@@ -24,7 +24,7 @@ pip install flask flask-socketio eventlet
 
 ## How to Use
 
-1. Run the server on your PC:
+1. Run the server on your PC in PowerShell (make sure you are in the directory pc_remote.py resides in):
 
    ```bash
    python pc_remote.py
