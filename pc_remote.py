@@ -1,6 +1,3 @@
-import eventlet
-eventlet.monkey_patch()
-
 from flask import Flask, render_template_string
 from flask_socketio import SocketIO
 import ctypes
@@ -12,8 +9,7 @@ app = Flask(__name__)
 
 socketio = SocketIO(
     app,
-    cors_allowed_origins="*",
-    async_mode="eventlet"
+    cors_allowed_origins="*"
 )
 
 
@@ -470,5 +466,9 @@ def type_text(data):
 # ── RUN SERVER ────────────────────────
 
 if __name__ == "__main__":
+    # Suppress Werkzeug 3.x persistent warning (harmless for local LAN)
+    import warnings
+    warnings.filterwarnings("ignore", message=r".*development server.*")
+
     print("Port 5000 now open")
     socketio.run(app, host="0.0.0.0", port=5000)
