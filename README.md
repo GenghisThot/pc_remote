@@ -1,71 +1,165 @@
 # PC Remote
 
-A lightweight web-based remote control for Windows machines. Access it from any device on your local network — tap, swipe, and type to control a PC in real time.
+Turn your phone, tablet, or another computer into a wireless mouse and keyboard for your Windows PC in the style of a remote.
 
-## Features
+- **Touchpad** for mouse movement
+- **Scroll rails** on both sides
+- **Left / Right click buttons**
+- **Media play/pause button**
+- **Text input bar** — type anything and it appears on your PC
+- **Adjustable mouse sensitivity slider**
 
-- **Mouse movement** via an on-screen touchpad
-- **Left / right click** buttons (or double-tap the touchpad for left-click)
-- **Scroll wheels** with animated visual indicators that follow your swipe direction
-- **Keyboard input** — type text and press Enter to send it character by character
-- **Media play/pause** button
-- **Fullscreen mode** for maximum screen real estate
+---
 
-## Requirements
+## Quick Start
 
-- Python 3.8+
-- Windows (uses `user32.dll` for input injection)
+### 1. Install Python
 
-Install dependencies:
+If you don't have Python:
+
+1. Go to [python.org](https://www.python.org/downloads/)
+2. Download the latest **Python 3.x** for Windows
+3. Run the installer — make sure **"Add Python to PATH"** is checked, then click **Install**
+
+
+### 2. Get PC Remote
+
+Download the file named pc_remote.py or click the link below:
 
 ```bash
-pip install flask flask-socketio eventlet
+[https://github.com/GenghisThot/pc_remote/blob/main/pc_remote.py](https://github.com/GenghisThot/pc_remote/blob/main/pc_remote.py)
 ```
 
-## How to Use
 
-1. Run the server on your PC in PowerShell (make sure you are in the directory pc_remote.py resides in):
+### 3. Install dependencies
 
-   ```bash
-   python pc_remote.py
-   ```
-
-2. Find your local IP (e.g., `192.168.1.?`).
-
-3. On any phone, tablet, or browser on the same network, open:
-    
-   ```
-   http://<your-local-ip>:5000 
-   ```
-   (e.g., `http://192.168.1.?:5000`)
-
-4. Use the controls:
-   - **Touchpad (center)** — drag to move cursor; double-tap for left-click
-   - **Scroll rails (left & right edges)** — swipe up/down to scroll
-   - **Buttons (bottom)** — Left, Right click, Play/Pause
-   - **Text input** — type and press Enter to send keystrokes
-
-## Controls Layout
-
-```
-┌─────────────────────────────┐
-│  ◉ PC Remote  [Fullscreen]  │
-├──────┬───────────────┬──────|
-│      │               │      │
-│scroll│   Touchpad    │scroll│
-│ pad  │   (cursor)    │ pad  │
-│      │               │      │
-├──────┴─────────────┬─┴──────┤
-│[◁ Left] [▶ Play] [Right ▷] │
-│  ┌───────────────────────┐  │
-│  │ Type here, press Enter│  │
-│  └───────────────────────┘  │
-│  Mouse Sensitivity: ◄━━━━━► │
-└─────────────────────────────┘
+```powershell
+pip install --upgrade flask-socketio flask
 ```
 
-## Notes
+### 4. Start the server
 
-- The server binds to `0.0.0.0` so it is reachable from any device on the local network.
-- **Not encrypted.** Only use on trusted networks.
-- If the connection isn't immediately responsive, adjust the mouse sensitivity to force the connection.
+```powershell
+python pc_remote.py
+```
+
+You should see at the bottom of the terminal:
+
+```
+Port 5000 now open
+```
+
+### 5. Connect from your phone or tablet
+
+Open a browser (Chrome, Safari, etc.) and go to the local IP address of the device that is running the script (step 4),
+> `<host.local.ip.address>:5000` e.g. `192.168.1.?:5000` or `192.168.0.?:5000`
+
+You need to use the **local network IP** (the one that starts with `192.` or `10.`), not `127.0.0.1` which is your loopback address.
+
+That's all, it should be operational now. 
+> Some FAQ can be answered below.
+
+---
+
+## How to use the controls
+
+| Control | What it does |
+|---------|-------------|
+| **Touchpad (center area)** | Drag your finger to move the mouse cursor |
+| **Double-tap touchpad** | Left click |
+| **Left scroll rail** | Scroll up / down |
+| **Right scroll rail** | Scroll up / down |
+| ◁ Left button | Left click |
+| Right ▷ button | Right click |
+| ▶ Play button | Sends media play/pause key |
+| Text bar (bottom) | Type anything, press Enter — it types on your PC |
+| Sensitivity slider | Adjust how far the cursor moves (1 = slow, 10 = fast) |
+
+---
+
+## FAQ for beginners
+
+### How do I find my local IP address?
+
+Open PowerShell or Command Prompt on the PC and run:
+
+```powershell
+ipconfig
+```
+
+Look for **IPv4 Address** under your active adapter (Wi-Fi or Ethernet).
+
+### My phone can't connect
+
+- Make sure your phone is on the **same Wi-Fi network** as the PC
+- The Windows firewall might block it. If so, try:
+  ```powershell
+  netsh advfirewall firewall add rule name="PC Remote" dir=in action=allow protocol=TCP localport=5000
+  ```
+- Use `http://` not `https://`
+
+### How do I stop the server?
+
+Press **Ctrl + C** in the terminal where you ran it.
+
+---
+
+### Requirements
+
+| | |
+|--|--|
+| OS | Windows 10 / 11 (uses `user32.dll`) |
+| Python | 3.8 or higher |
+| Dependencies | `flask`, `flask-socketio` |
+| Async engine | Auto-detected by flask-socketio (no eventlet/gevent needed) |
+
+> You should get everything you need if you follow the steps above.
+
+
+### Architecture
+
+```
+Phone browser (Socket.IO client)
+        ↓  WSS / HTTP long-polling
+  pc_remote.py (Flask + python-socketio server)
+        ↓
+  ctypes → user32.dll (mouse_event, keybd_event, VkKeyScanW)
+```
+
+All input events are injected directly into the Windows desktop. No virtual machine or remote-desktop protocol is used — just raw `user32` calls.
+
+### Ports and binding
+
+- Binds to `0.0.0.0:5000` (all interfaces on port 5000)
+- CORS is set to `*` for LAN access from any device
+- The Werkzeug dev server is used intentionally — this is a local-LAN tool, not an internet-facing app
+
+### Socket.IO events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `move` | client → server | `{ dx: number, dy: number }` |
+| `scroll` | client → server | `{ dy: number }` |
+| `left` | client → server | *(none)* |
+| `right` | client → server | *(none)* |
+| `play` | client → server | *(none)* |
+| `type` | client → server | `{ text: string }` |
+
+### Security
+
+This app has **no authentication**. Anyone on the same network who knows the IP can control your mouse and keyboard.
+
+- It is designed for **trusted local networks only**
+- Do **not** expose port 5000 to the internet (no port forwarding)
+
+---
+
+## Deployment beyond localhost (would NOT recommend)
+
+This is built for local use. If you need remote or always-on hosting:
+
+1. **Tailscale / ZeroTier** — create an encrypted overlay network between your PC and phone (recommended, no extra server config needed)
+2. **Railway / Render / Fly.io** — deploy the Python server with a production runner like `gunicorn -k gthread`
+3. **VPS + Gunicorn/Uvicorn** — full control; add a reverse proxy (Caddy / Nginx) in front
+
+---
