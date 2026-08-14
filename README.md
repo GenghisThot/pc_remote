@@ -24,11 +24,8 @@ If you don't have Python:
 
 ### 2. Get PC Remote
 
-Download the file named pc_remote.py or click the link below:
+Download the file named [pc_remote.py](https://github.com/GenghisThot/pc_remote/blob/main/pc_remote.py).
 
-```bash
-[https://github.com/GenghisThot/pc_remote/blob/main/pc_remote.py](https://github.com/GenghisThot/pc_remote/blob/main/pc_remote.py)
-```
 
 
 ### 3. Install dependencies
