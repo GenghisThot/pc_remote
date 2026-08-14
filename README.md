@@ -30,12 +30,14 @@ Download the file named [pc_remote.py](https://github.com/GenghisThot/pc_remote/
 
 ### 3. Install dependencies
 
+Run step 3 and step 4 in PowerShell:
 ```powershell
 pip install --upgrade flask-socketio flask
 ```
 
 ### 4. Start the server
 
+Go to the directory path in your terminal where you downloaded pc_remote.py and run this:
 ```powershell
 python pc_remote.py
 ```
@@ -54,7 +56,7 @@ Open a browser (Chrome, Safari, etc.) and go to the local IP address of the devi
 You need to use the **local network IP** (the one that starts with `192.` or `10.`), not `127.0.0.1` which is your loopback address.
 
 That's all, it should be operational now. 
-> Some FAQ can be answered below.
+> Some FAQ can be answered below. 
 
 ---
 
